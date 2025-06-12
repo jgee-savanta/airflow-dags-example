@@ -37,7 +37,7 @@ def copy_sqlserver_to_snowflake(**context):
     )
     assert success, f"Data load to Snowflake failed for table {target_table}"
 
-with DAG('fullcopy_sqlserver_to_snowflake', start_date=datetime(2024, 1, 1), schedule=None, catchup=False) as dag:
+with DAG('live.fullcopy_sqlserver_to_snowflake', start_date=datetime(2024, 1, 1), schedule=None, catchup=False) as dag:
     copy_task = PythonOperator(
         task_id='fullcopy_sqlserver_to_snowflake_task',
         python_callable=copy_sqlserver_to_snowflake

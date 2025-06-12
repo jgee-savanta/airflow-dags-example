@@ -14,7 +14,7 @@ def test_snowflake_conn_fn(**kwargs):
     conn.close()
 
 
-with DAG(dag_id='test_snowflake_connection', start_date=datetime(2024, 1, 1), schedule=None, catchup=False) as dag:
+with DAG(dag_id='beta.test_snowflake_connection', start_date=datetime(2024, 1, 1), schedule=None, catchup=False) as dag:
     test_conn = PythonOperator(
         task_id='test_conn_task',
         python_callable=test_snowflake_conn_fn
