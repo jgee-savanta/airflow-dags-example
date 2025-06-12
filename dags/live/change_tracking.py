@@ -81,7 +81,7 @@ def sync_changes_to_snowflake(**context):
     if max_change_version > last_change_version:
         Variable.set('last_change_version', str(max_change_version))
 
-with DAG(dag_id='live.sync_sqlserver_to_snowflake', start_date=datetime(2024, 1, 1), schedule=None, catchup=False) as dag:
+with DAG(dag_id='live.sync_sqlserver_to_snowflake', tags=['live'], start_date=datetime(2024, 1, 1), schedule=None, catchup=False) as dag:
     sync_task = PythonOperator(
         task_id='sync_changes_to_snowflake',
         python_callable=sync_changes_to_snowflake
