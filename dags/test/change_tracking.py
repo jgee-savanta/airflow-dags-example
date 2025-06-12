@@ -1,8 +1,8 @@
 from airflow import DAG
+from airflow.models import Variable
 from airflow.operators.python import PythonOperator
 from airflow.providers.microsoft.mssql.hooks.mssql import MsSqlHook
 from airflow.providers.snowflake.hooks.snowflake import SnowflakeHook
-from airflow.sdk import Variable
 from datetime import datetime
 
 
