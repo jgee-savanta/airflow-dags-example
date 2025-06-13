@@ -6,5 +6,6 @@ with DAG(dag_id='live.test_azure_mssql_connection', tags=['live'], start_date=da
     task = SQLExecuteQueryOperator(
         task_id='run_select',
         sql="SELECT GETDATE();",
-        conn_id='azure_sql_vm'
+        conn_id='azure_sql_vm',
+        database='AllVueConfig_TestEnv_LiveSnapshotSurveys_Snowflake'
     )
