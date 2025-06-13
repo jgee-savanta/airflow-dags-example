@@ -4,7 +4,7 @@ from airflow.providers.snowflake.hooks.snowflake import SnowflakeHook
 from datetime import datetime
 
 def test_snowflake_conn_fn(**kwargs):
-    hook = SnowflakeHook(snowflake_conn_id='snowflake')
+    hook = SnowflakeHook(snowflake_conn_id='snowflake_meta_test')
     conn = hook.get_conn()
     cursor = conn.cursor()
     cursor.execute("SELECT CURRENT_VERSION();")   # any lightweight query
