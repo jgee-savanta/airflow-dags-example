@@ -13,7 +13,7 @@ def test_snowflake_conn_fn(**kwargs):
         database="BRANDVUEMETA_TEST",
         role="SYSADMIN",
         private_key=os.environ.get('SNOWFLAKE_PRIVATE_KEY'),
-        private_key_passphrase=os.environ.get('SNOWFLAKE_KEY_ENCRYPTION_PASSWORD')
+        password=os.environ.get('SNOWFLAKE_KEY_ENCRYPTION_PASSWORD')
     )
     
     cursor = conn.cursor()
