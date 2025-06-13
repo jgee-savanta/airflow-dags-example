@@ -1,28 +1,26 @@
 import os
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from airflow.providers.snowflake.hooks.snowflake import SnowflakeHook
+import snowflake.connector
 from datetime import datetime
 
 def test_snowflake_conn_fn(**kwargs):
     private_key = f"-----BEGIN ENCRYPTED PRIVATE KEY-----\n{os.environ.get('SNOWFLAKE_PRIVATE_KEY')}\n-----END ENCRYPTED PRIVATE KEY-----"
     private_key_passphrase = os.environ.get('SNOWFLAKE_KEY_ENCRYPTION_PASSWORD')
     
-    # Create connection parameters
-    conn_params = {
-        "account": "YNDSYIO-SAVANTAUK",
-        "user": "AZURE_CONNECTOR",
-        "warehouse": "WAREHOUSE_XSMALL",
-        "database": "BRANDVUEMETA_TEST",
-        "role": "SYSADMIN",
-        "private_key": private_key,
-        "private_key_passphrase": private_key_passphrase
-    }
-
-    hook = SnowflakeHook(snowflake_conn_id=None, **conn_params)
-    conn = hook.get_conn()
+    # Create connection directly using snowflake.connector
+    conn = snowflake.connector.connect(
+        account="YNDSYIO-SAVANTAUK",
+        user="AZURE_CONNECTOR",
+        warehouse="WAREHOUSE_XSMALL",
+        database="BRANDVUEMETA_TEST",
+        role="SYSADMIN",
+        private_key=private_key,
+        private_key_passphrase=private_key_passphrase
+    )
+    
     cursor = conn.cursor()
-    cursor.execute("SELECT CURRENT_VERSION();")   # any lightweight query
+    cursor.execute("SELECT CURRENT_VERSION();")
     result = cursor.fetchone()
     print("Connection OK, Snowflake version:", result[0])
     cursor.close()
