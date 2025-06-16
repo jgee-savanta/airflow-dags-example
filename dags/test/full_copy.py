@@ -1,15 +1,17 @@
+import os
+import tempfile
+import pandas as pd
+import snowflake.connector
+from snowflake.connector.pandas_tools import write_pandas
 from airflow import DAG
 from airflow.providers.microsoft.mssql.hooks.mssql import MsSqlHook
 from airflow.providers.snowflake.hooks.snowflake import SnowflakeHook
 from airflow.operators.python import PythonOperator
-import pandas as pd
 from datetime import datetime
 
 
 def copy_sqlserver_to_snowflake(**context):
-    # Connections (refer to Airflow Connection IDs)
-    mssql_conn_id = 'local-ssms'
-    snowflake_conn_id = 'snowflake'
+    mssql_conn_id = 'azure_sql_vm'
     
     source_table = 'dbo.Features'
     target_table = 'BrandVueMeta_Test.vue.Features'.upper()
@@ -20,18 +22,33 @@ def copy_sqlserver_to_snowflake(**context):
     df.rename(columns=lambda x: x.upper(), inplace=True)  # Ensure column names are uppercase to match Snowflake
     
     # Step 2: Truncate Snowflake table
-    sf_hook = SnowflakeHook(snowflake_conn_id=snowflake_conn_id)
+    private_key_pem = f"-----BEGIN ENCRYPTED PRIVATE KEY-----\n{os.environ.get('SNOWFLAKE_PRIVATE_KEY')}\n-----END ENCRYPTED PRIVATE KEY-----"
+
+    with tempfile.NamedTemporaryFile(delete=False, mode='w') as key_file:
+        key_file_path = key_file.name
+        key_file.write(private_key_pem)
+
+    conn = snowflake.connector.connect(
+        account="YNDSYIO-SAVANTAUK",
+        user="AZURE_CONNECTOR",
+        warehouse="WAREHOUSE_XSMALL",
+        database="BRANDVUEMETA_TEST",
+        role="SYSADMIN",
+        private_key_file=key_file_path,
+        private_key_file_pwd=os.environ.get('SNOWFLAKE_KEY_ENCRYPTION_PASSWORD')
+    )
+
+    cursor = conn.cursor()
     truncate_sql = f"TRUNCATE TABLE {target_table}"
-    sf_hook.run(truncate_sql)
-    
+    cursor.execute(truncate_sql)
+
     # Step 3: Load data into Snowflake
-    # We'll use Snowflake's write_pandas for efficiency:
-    session = sf_hook.get_snowpark_session()
-    success = session.write_pandas(
+    success = write_pandas(
+        conn=conn,
         df=df,
-        table_name=target_table.split('.')[-1],      # Table name without schema/db
-        schema=target_table.split('.')[-2],          # Schema name
-        database=target_table.split('.')[-3],        # Database name
+        table_name=target_table.split('.')[-1],
+        schema=target_table.split('.')[-2],
+        database=target_table.split('.')[-3],
         quote_identifiers=True,
         # auto_create_table=True, 
     )
