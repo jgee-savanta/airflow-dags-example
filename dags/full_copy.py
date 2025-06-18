@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 from snowflake.connector.pandas_tools import write_pandas
 from airflow import DAG
@@ -8,9 +9,9 @@ from utils.snowflake_utils import get_snowflake_connection
 
 
 def copy_sqlserver_to_snowflake(**context):
-    mssql_conn_id = 'azure_sql_test_beta'
-    source_table = 'BrandVueMetaTest.dbo.Features'
-    target_table = 'Vue_Test.vue.Features'.upper()
+    mssql_conn_id = os.environ.get('AZURE_SQL_SERVER_CONN_ID')
+    source_table = f'{os.environ.get('AZURE_SQL_SERVER_METADATA_DATABASE')}.dbo.Features'
+    target_table = f'{os.environ.get('SNOWFLAKE_DATABASE')}.VUE.FEATURES'
     
     # Step 1: Extract from SQL Server
     mssql_hook = MsSqlHook(mssql_conn_id=mssql_conn_id)
@@ -36,7 +37,7 @@ def copy_sqlserver_to_snowflake(**context):
         assert success, f"Data load to Snowflake failed for table {target_table}"
 
 
-with DAG(dag_id='test.fullcopy_sqlserver_to_snowflake', tags=['test'], start_date=datetime(2024, 1, 1), schedule=None, catchup=False) as dag:
+with DAG(dag_id='fullcopy_sqlserver_to_snowflake', tags=[os.environ.get('ENVIRONMENT')], start_date=datetime(2025, 1, 1), schedule=None, catchup=False) as dag:
     copy_task = PythonOperator(
         task_id='fullcopy_sqlserver_to_snowflake_task',
         python_callable=copy_sqlserver_to_snowflake

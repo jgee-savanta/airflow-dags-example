@@ -1,3 +1,4 @@
+import os
 from airflow import DAG
 from airflow.models import Variable
 from airflow.operators.python import PythonOperator
@@ -7,7 +8,7 @@ from utils.snowflake_utils import get_snowflake_connection
 
 
 def sync_changes_to_snowflake(**context):
-    database = 'BrandVueMetaBeta'
+    database = os.environ.get('AZURE_SQL_SERVER_METADATA_DATABASE')
     table_schema = 'dbo'
     table_name = 'Features'
     pk_column = 'Id'
@@ -19,7 +20,7 @@ def sync_changes_to_snowflake(**context):
         LEFT JOIN {database}.{table_schema}.{table_name} AS t
           ON t.{pk_column} = ct.{pk_column}
     """
-    mssql_hook = MsSqlHook(mssql_conn_id='azure_sql_test_beta')
+    mssql_hook = MsSqlHook(mssql_conn_id=os.environ.get('AZURE_SQL_SERVER_CONN_ID'))
     results = mssql_hook.get_records(sql)
 
     if not results:
@@ -80,7 +81,7 @@ def sync_changes_to_snowflake(**context):
         Variable.set('last_change_version', str(max_change_version))
 
 
-with DAG(dag_id='beta.sync_sqlserver_to_snowflake', tags=['beta'], start_date=datetime(2024, 1, 1), schedule=None, catchup=False) as dag:
+with DAG(dag_id='sync_sqlserver_to_snowflake', tags=[os.environ.get('ENVIRONMENT')], start_date=datetime(2025, 1, 1), schedule=None, catchup=False) as dag:
     sync_task = PythonOperator(
         task_id='sync_changes_to_snowflake',
         python_callable=sync_changes_to_snowflake

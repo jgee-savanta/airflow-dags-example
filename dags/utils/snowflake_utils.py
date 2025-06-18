@@ -24,7 +24,7 @@ def get_snowflake_connection():
             account="YNDSYIO-SAVANTAUK",
             user="AZURE_CONNECTOR",
             warehouse="WAREHOUSE_XSMALL",
-            database="VUE_TEST",
+            database=os.environ.get('SNOWFLAKE_DATABASE'),
             role="SYSADMIN",
             private_key_file=key_file_path,
             private_key_file_pwd=os.environ.get('SNOWFLAKE_KEY_ENCRYPTION_PASSWORD')
