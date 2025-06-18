@@ -8,9 +8,9 @@ from utils.snowflake_utils import get_snowflake_connection
 
 
 def copy_sqlserver_to_snowflake(**context):
-    mssql_conn_id = 'azure_sql_vm'
-    source_table = 'dbo.Features'
-    target_table = 'BrandVueMeta_Test.vue.Features'.upper()
+    mssql_conn_id = 'azure_sql_test_beta'
+    source_table = 'BrandVueMeta.dbo.Features'
+    target_table = 'Vue_Test.vue.Features'.upper()
     
     # Step 1: Extract from SQL Server
     mssql_hook = MsSqlHook(mssql_conn_id=mssql_conn_id)

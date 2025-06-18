@@ -7,6 +7,7 @@ from utils.snowflake_utils import get_snowflake_connection
 
 
 def sync_changes_to_snowflake(**context):
+    database = 'BrandVueMetaTest'
     table_schema = 'dbo'
     table_name = 'Features'
     pk_column = 'Id'
@@ -14,11 +15,11 @@ def sync_changes_to_snowflake(**context):
 
     sql = f"""
         SELECT ct.SYS_CHANGE_VERSION, ct.SYS_CHANGE_OPERATION, ct.Id, t.*
-        FROM CHANGETABLE(CHANGES {table_schema}.{table_name}, {last_change_version}) AS ct
-        LEFT JOIN {table_schema}.{table_name} AS t
+        FROM CHANGETABLE(CHANGES {database}.{table_schema}.{table_name}, {last_change_version}) AS ct
+        LEFT JOIN {database}.{table_schema}.{table_name} AS t
           ON t.{pk_column} = ct.{pk_column}
     """
-    mssql_hook = MsSqlHook(mssql_conn_id='azure_sql_vm')
+    mssql_hook = MsSqlHook(mssql_conn_id='azure_sql_test_beta')
     results = mssql_hook.get_records(sql)
 
     if not results:
