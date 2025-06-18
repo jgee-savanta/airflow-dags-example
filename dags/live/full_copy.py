@@ -31,6 +31,7 @@ def copy_sqlserver_to_snowflake(**context):
             schema=target_table.split('.')[-2],
             database=target_table.split('.')[-3],
             quote_identifiers=True,
+            auto_create_table=True
         )
         assert success, f"Data load to Snowflake failed for table {target_table}"
 
